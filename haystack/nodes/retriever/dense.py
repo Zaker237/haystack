@@ -103,6 +103,7 @@ class DensePassageRetriever(DenseRetriever):
         devices: Optional[List[Union[str, torch.device]]] = None,
         use_auth_token: Optional[Union[str, bool]] = None,
         scale_score: bool = True,
+        special_tokens: List[str] = [],
     ):
         """
         Init the Retriever incl. the two encoder models from a local or remote model checkpoint.
@@ -161,6 +162,7 @@ class DensePassageRetriever(DenseRetriever):
         :param scale_score: Whether to scale the similarity score to the unit interval (range of [0,1]).
                             If true (default) similarity scores (e.g. cosine or dot_product) which naturally have a different value range will be scaled to a range of [0,1], where 1 means extremely relevant.
                             Otherwise raw similarity scores (e.g. cosine or dot_product) will be used.
+        :param special_tokens: If there are additional special tokens that should be add to the tokennizers to have better tokenization.
         """
         super().__init__()
 
@@ -208,6 +210,14 @@ class DensePassageRetriever(DenseRetriever):
             model_type="DPRContextEncoder",
             use_auth_token=use_auth_token,
         )
+
+        if len(special_tokens) > 0:
+            special_tokens_dict = {
+                "additional_special_tokens": special_tokens
+            }
+
+            self.query_tokenizer.add_special_tokens(special_tokens_dict)
+            self.passage_tokenizer.add_special_tokens(special_tokens_dict)
 
         self.processor = TextSimilarityProcessor(
             query_tokenizer=self.query_tokenizer,
