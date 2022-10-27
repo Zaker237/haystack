@@ -193,12 +193,19 @@ class DensePassageRetriever(DenseRetriever):
             use_fast=use_fast_tokenizers,
             use_auth_token=use_auth_token,
         )
+        if len(special_tokens) > 0:
+            special_tokens_dict = {
+                "additional_special_tokens": special_tokens
+            }
+            self.query_tokenizer.add_special_tokens(special_tokens_dict)
+
         self.query_encoder = DPREncoder(
             pretrained_model_name_or_path=query_embedding_model,
             model_type="DPRQuestionEncoder",
             use_auth_token=use_auth_token,
             n_added_tokens=len(special_tokens),
         )
+
         self.passage_tokenizer = DPRContextEncoderTokenizerFast.from_pretrained(
             pretrained_model_name_or_path=passage_embedding_model,
             revision=model_version,
@@ -206,20 +213,18 @@ class DensePassageRetriever(DenseRetriever):
             use_fast=use_fast_tokenizers,
             use_auth_token=use_auth_token,
         )
+        if len(special_tokens) > 0:
+            special_tokens_dict = {
+                "additional_special_tokens": special_tokens
+            }
+            self.passage_tokenizer.add_special_tokens(special_tokens_dict)
+
         self.passage_encoder = DPREncoder(
             pretrained_model_name_or_path=passage_embedding_model,
             model_type="DPRContextEncoder",
             use_auth_token=use_auth_token,
             n_added_tokens=len(special_tokens),
         )
-
-        if len(special_tokens) > 0:
-            special_tokens_dict = {
-                "additional_special_tokens": special_tokens
-            }
-
-            self.query_tokenizer.add_special_tokens(special_tokens_dict)
-            self.passage_tokenizer.add_special_tokens(special_tokens_dict)
             
         self.processor = TextSimilarityProcessor(
             query_tokenizer=self.query_tokenizer,

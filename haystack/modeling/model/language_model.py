@@ -535,6 +535,19 @@ class DPREncoder(LanguageModel):
                 use_auth_token=use_auth_token,
                 language=language,
             )
+        
+        # resize embeddings in case of custom vocab
+        if n_added_tokens != 0:
+            # TODO verify for other models than BERT
+            model_emb_size = self.model.resize_token_embeddings(new_num_tokens=None).num_embeddings
+            vocab_size = model_emb_size + n_added_tokens
+            logger.info(
+                f"Resizing embedding layer of LM from {model_emb_size} to {vocab_size} to cope with custom vocab."
+            )
+            self.model.resize_token_embeddings(vocab_size)
+            # verify
+            model_emb_size = self.model.resize_token_embeddings(new_num_tokens=None).num_embeddings
+            assert vocab_size == model_emb_size
 
     def _init_model_haystack_style(
         self,
