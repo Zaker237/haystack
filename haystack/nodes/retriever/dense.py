@@ -197,6 +197,7 @@ class DensePassageRetriever(DenseRetriever):
             pretrained_model_name_or_path=query_embedding_model,
             model_type="DPRQuestionEncoder",
             use_auth_token=use_auth_token,
+            n_added_tokens=len(special_tokens),
         )
         self.passage_tokenizer = DPRContextEncoderTokenizerFast.from_pretrained(
             pretrained_model_name_or_path=passage_embedding_model,
@@ -209,6 +210,7 @@ class DensePassageRetriever(DenseRetriever):
             pretrained_model_name_or_path=passage_embedding_model,
             model_type="DPRContextEncoder",
             use_auth_token=use_auth_token,
+            n_added_tokens=len(special_tokens),
         )
 
         if len(special_tokens) > 0:
@@ -218,7 +220,7 @@ class DensePassageRetriever(DenseRetriever):
 
             self.query_tokenizer.add_special_tokens(special_tokens_dict)
             self.passage_tokenizer.add_special_tokens(special_tokens_dict)
-
+            
         self.processor = TextSimilarityProcessor(
             query_tokenizer=self.query_tokenizer,
             passage_tokenizer=self.passage_tokenizer,
